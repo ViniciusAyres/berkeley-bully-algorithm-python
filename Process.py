@@ -1,6 +1,6 @@
-import socket
 import pickle
 import threading
+from socket import *
 from Timer import Timer
 
 class Process:
@@ -9,6 +9,7 @@ class Process:
 	def __init__(self, pid):
 		self.pid = pid
 		self.timer = Timer()
+		self.__initSocket()
 		
 		listener = threading.Thread(target=self.__listenMessages)
 		raw_input('Press Enter to continue...')
@@ -19,8 +20,8 @@ class Process:
 
 	def __listenMessages(self):
 		print('Waiting messages...')
-		client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-		client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+		client = socket(AF_INET, SOCK_DGRAM)
+		client.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 		client.bind(("", self.PORT))
 
 		while(True):
@@ -29,4 +30,9 @@ class Process:
 			print('received message: %s' %message)
 	
 	def __sendMessage(self, message):
-		pass
+		data = pickle.dumps(message)
+		self.socket.sendto(data, ('<broadcast>', self.PORT))
+
+	def __initSocket(self):
+		self.socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+		self.socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
