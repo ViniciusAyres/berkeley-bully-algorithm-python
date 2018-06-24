@@ -9,6 +9,8 @@ from ElectionResponseMessage import ElectionResponseMessage
 
 class Process:
 	DEFAULT_PORT = 37022
+	ELECTION_PORT = 37023
+	SYNCHRONIZE_TIME_PORT = 37024
 
 	def __init__(self):
 		self.pid = randint(0,1000)
@@ -42,9 +44,6 @@ class Process:
 				elif (message.subject == "election_response"):
 					print(message.getMessage())
 						
-
-
-	
 	def __sendBroadcastMessage(self, message):
 		data = pickle.dumps(message)
 		self.broadcastSocket.sendto(data, ('<broadcast>', self.DEFAULT_PORT))
@@ -69,5 +68,7 @@ class Process:
 
 	def __electionResponse(self, adress):
 		message = ElectionResponseMessage(self.pid, 0)
-		self.__sendMessage(message, adress)
-
+		self.__sendMessage(message, adress, self.ELECTION_PORT)
+	
+	def __synchronizeTimer(self):
+		pass
