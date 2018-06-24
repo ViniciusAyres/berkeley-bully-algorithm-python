@@ -1,9 +1,8 @@
-from datetime import timedelta, datetime
 import time
 import threading
 
 class Timer:
-	def __init__(self, time=datetime.now(), increment=1, secondsToUpdate=1):
+	def __init__(self, time=0, increment=1, secondsToUpdate=1):
 		self.time = time
 		self.increment = increment
 		self.secondsToUpdate = secondsToUpdate
@@ -18,7 +17,7 @@ class Timer:
 		self.time = time
 
 	def updateTime(self):
-		self.time = self.time + timedelta(seconds=self.increment)
+		self.time += self.increment
 
 	def __start(self):
 		while(True):
