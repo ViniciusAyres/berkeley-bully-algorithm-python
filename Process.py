@@ -1,7 +1,9 @@
 import pickle
 import threading
 from socket import *
+from random import randint
 from Timer import Timer
+from PingMessage import PingMessage
 
 class Process:
 	PORT = 37022
@@ -14,6 +16,7 @@ class Process:
 		listener = threading.Thread(target=self.__listenMessages)
 		raw_input('Press Enter to continue...')
 		listener.start()
+		self.__randomPing(randint(1, 5))
 
 	def __str__(self):
 		return 'pid: ' + str(self.pid)
@@ -36,3 +39,8 @@ class Process:
 	def __initSocket(self):
 		self.socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
 		self.socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+		
+	def __randomPing(self, interval):
+		message = PingMessage(self.pid, 0)
+		self.__sendMessage(message)
+		threading.Timer(0.25, self.__randomPing, args=[interval]).start()
