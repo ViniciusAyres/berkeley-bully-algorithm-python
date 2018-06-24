@@ -6,7 +6,7 @@ from Timer import Timer
 from PingMessage import PingMessage
 
 class Process:
-	PORT = 37022
+	DEFAULT_PORT = 37022
 
 	def __init__(self, pid):
 		self.pid = pid
@@ -25,7 +25,7 @@ class Process:
 		print('Waiting messages...')
 		client = socket(AF_INET, SOCK_DGRAM)
 		client.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-		client.bind(("", self.PORT))
+		client.bind(("", self.DEFAULT_PORT))
 
 		while(True):
 			data, addr = client.recvfrom(1024)
@@ -36,11 +36,11 @@ class Process:
 	
 	def __sendBroadcastMessage(self, message):
 		data = pickle.dumps(message)
-		self.broadcastSocket.sendto(data, ('<broadcast>', self.PORT))
+		self.broadcastSocket.sendto(data, ('<broadcast>', self.DEFAULT_PORT))
 
-	def __sendMessage(self, message, address):
+	def __sendMessage(self, message, address,  port):
 		data = pickle.dumps(message)
-		self.udpSocket.sendto(data, (address, self.PORT))
+		self.udpSocket.sendto(data, (address, port))
 
 	def __initSockets(self):
 		self.udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
