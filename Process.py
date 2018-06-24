@@ -97,6 +97,9 @@ class Process:
 
 		if len(messages) == 0:
 			self.isCoordinator = True
+		else:
+			coordMessage = self.__choiceCoordinator(messages)
+			
 
 		threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 
@@ -123,3 +126,11 @@ class Process:
 			message = UpdateTimeMessage(self.pid, 0, updatedTime)
 			self.__sendBroadcastMessage(message)
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
+
+	def __choiceCoordinator(self, messages):
+		biggerMsg = messages[0]
+		for i in range(len(messages)):
+			if messages[i].sourceId > biggerMsg.sourceId:
+				biggerMsg = messages[i]
+			
+		return biggerMsg
