@@ -4,12 +4,14 @@ from socket import *
 from random import randint
 from Timer import Timer
 from PingMessage import PingMessage
+from NewElectionMessage import NewElectionMessage
+from ElectionResponseMessage import ElectionResponseMessage
 
 class Process:
 	PORT = 37022
 
-	def __init__(self, pid):
-		self.pid = pid
+	def __init__(self):
+		self.pid = randint(0,1000)
 		self.timer = Timer()
 		self.__initSockets()
 		
@@ -31,8 +33,17 @@ class Process:
 			data, addr = client.recvfrom(1024)
 			message = pickle.loads(data)
 			if(message.sourceId != self.pid):
-				print('received message: %s' %message)
-				print(message.getMessage())
+				print('received message: %s' %message)				
+				if (message.subject == "ping"):
+					print(message.getMessage())
+				elif (message.subject == "new_election"):
+					if (self.pid > message.sourceId):
+						self.__electionResponse(addr)
+				elif (message.subject == "election_response"):
+					print(message.getMessage())
+						
+
+
 	
 	def __sendBroadcastMessage(self, message):
 		data = pickle.dumps(message)
@@ -51,3 +62,12 @@ class Process:
 		message = PingMessage(self.pid, 0)
 		self.__sendBroadcastMessage(message)
 		threading.Timer(interval, self.__randomPing, args=[interval]).start()
+
+	def __newElection(self):
+		message = NewElectionMessage(self.pid, 0)
+		self.__sendBroadcastMessage(message)
+
+	def __electionResponse(self, adress):
+		message = ElectionResponseMessage(self.pid, 0)
+		self.__sendMessage(message, adress)
+
