@@ -15,6 +15,7 @@ class Process:
 	SYNCHRONIZE_TIME_PORT = 37024
 
 	def __init__(self):
+		self.isCoordinator = False
 		self.pid = randint(0,1000)
 		self.timer = Timer()
 		self.__initSockets()
@@ -71,7 +72,28 @@ class Process:
 	def __electionResponse(self, adress):
 		message = ElectionResponseMessage(self.pid, 0)
 		self.__sendMessage(message, adress, self.ELECTION_PORT)
-	
+		
+	def __startElection(self):
+		print('Starting election...')
+		electionSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+		electionSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+		electionSocket.settimeout(0.5)
+		electionSocket.bind(("", self.ELECTION_PORT))
+		
+		messages = []
+		message = ElectionMessage(self.pid, 0)
+		self.__sendBroadcastMessage(message)
+
+		try:
+			while(True):
+				data, addr = electionSocket.recvfrom(1024)
+				messages.append(pickle.loads(data))
+		except timeout:
+			print('Received %s election messages responses' %(len(messages)))
+
+		if len(messages) == 0:
+			self.isCoordinator = True
+
 	def __synchronizeTimer(self):
 		print('Starting time synchronization...')
 		timerSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
