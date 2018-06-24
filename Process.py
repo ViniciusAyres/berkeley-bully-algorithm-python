@@ -45,4 +45,4 @@ class Process:
 	def __randomPing(self, interval):
 		message = PingMessage(self.pid, 0)
 		self.__sendMessage(message)
-		threading.Timer(0.25, self.__randomPing, args=[interval]).start()
+		threading.Timer(interval, self.__randomPing, args=[interval]).start()
