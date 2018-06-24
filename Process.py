@@ -11,7 +11,7 @@ class Process:
 	def __init__(self, pid):
 		self.pid = pid
 		self.timer = Timer()
-		self.__initSocket()
+		self.__initSockets()
 		
 		listener = threading.Thread(target=self.__listenMessages)
 		raw_input('Press Enter to continue...')
@@ -34,15 +34,20 @@ class Process:
 				print('received message: %s' %message)
 				print(message.getMessage())
 	
-	def __sendMessage(self, message):
+	def __sendBroadcastMessage(self, message):
 		data = pickle.dumps(message)
-		self.socket.sendto(data, ('<broadcast>', self.PORT))
+		self.broadcastSocket.sendto(data, ('<broadcast>', self.PORT))
 
-	def __initSocket(self):
-		self.socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-		self.socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+	def __sendMessage(self, message, address):
+		data = pickle.dumps(message)
+		self.udpSocket.sendto(data, (address, self.PORT))
+
+	def __initSockets(self):
+		self.udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+		self.broadcastSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+		self.broadcastSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 		
 	def __randomPing(self, interval):
 		message = PingMessage(self.pid, 0)
-		self.__sendMessage(message)
+		self.__sendBroadcastMessage(message)
 		threading.Timer(interval, self.__randomPing, args=[interval]).start()
