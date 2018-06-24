@@ -98,7 +98,8 @@ class Process:
 		if len(messages) == 0:
 			self.isCoordinator = True
 		else:
-			coordMessage = self.__choiceCoordinator(messages)
+			listener = threading.Thread(target=self.__startElection)
+			listener.start()
 			
 
 		threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
