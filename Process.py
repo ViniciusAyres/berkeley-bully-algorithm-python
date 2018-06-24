@@ -30,7 +30,9 @@ class Process:
 		while(True):
 			data, addr = client.recvfrom(1024)
 			message = pickle.loads(data)
-			print('received message: %s' %message)
+			if(message.sourceId != self.pid):
+				print('received message: %s' %message)
+				print(message.getMessage())
 	
 	def __sendMessage(self, message):
 		data = pickle.dumps(message)
