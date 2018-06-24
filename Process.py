@@ -1,13 +1,15 @@
 import socket
 import pickle
 import threading
+from Timer import Timer
 
 class Process:
 	PORT = 37022
 
 	def __init__(self, pid):
 		self.pid = pid
-
+		self.timer = Timer()
+		
 		listener = threading.Thread(target=self.__listenMessages)
 		raw_input('Press Enter to continue...')
 		listener.start()
