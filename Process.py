@@ -6,6 +6,8 @@ from Timer import Timer
 from PingMessage import PingMessage
 from NewElectionMessage import NewElectionMessage
 from ElectionResponseMessage import ElectionResponseMessage
+from SynchronizeTimeMessage import SynchronizeTimeMessage
+from UpdateTimeMessage import UpdateTimeMessage
 
 class Process:
 	DEFAULT_PORT = 37022
@@ -71,4 +73,23 @@ class Process:
 		self.__sendMessage(message, adress, self.ELECTION_PORT)
 	
 	def __synchronizeTimer(self):
-		pass
+		print('Starting time synchronization...')
+		timerSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+		timerSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+		timerSocket.settimeout(0.5)
+		timerSocket.bind(("", self.SYNCHRONIZE_TIME_PORT))
+		
+		messages = [self.timer.getTime()]
+		message = SynchronizeTimeMessage(self.pid, 0)
+		self.__sendBroadcastMessage(message)
+
+		try:
+			while(True):
+				data, addr = timerSocket.recvfrom(1024)
+				messages.append(pickle.loads(data))
+		except timeout:
+			print('Received %s time message responses' %( len(messages) - 1 ))
+		
+		updatedTime = reduce(lambda x, y: x.getMessage() + y.getMessage(), messages) / len(messages)
+		message = UpdateTimeMessage(self.pid, 0, updatedTime)
+		self.__sendBroadcastMessage(message)
