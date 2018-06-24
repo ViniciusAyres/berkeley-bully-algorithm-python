@@ -50,7 +50,9 @@ class Process:
 			print(message.getMessage())
 		elif (message.subject == "new_election"):
 			if (self.pid > message.sourceId):
-				self.__electionResponse(addr)
+				self.__electionResponse(addr)					
+				listener = threading.Thread(target=self.__startElection)
+				listener.start()
 		elif (message.subject == "election_response"):
 			print(message.getMessage())
 
@@ -101,10 +103,10 @@ class Process:
 		if len(messages) == 0:
 			self.isCoordinator = True
 			print('I\'m the new coordinator')
+			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 		else:
 			print('I lost the election.')
 
-		threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 
 	def __synchronizeTimer(self, interval=SYNCHRONIZATION_TIME):
 		if self.isCoordinator:
