@@ -39,15 +39,18 @@ class Process:
 			data, addr = client.recvfrom(1024)
 			message = pickle.loads(data)
 			if(message.sourceId != self.pid):
-				print('received message: %s' %message)				
-				if (message.subject == "ping"):
-					print(message.getMessage())
-				elif (message.subject == "new_election"):
-					if (self.pid > message.sourceId):
-						self.__electionResponse(addr)
-				elif (message.subject == "election_response"):
-					print(message.getMessage())
-						
+				self.__handleMessage(message, addr)
+			
+	def __handleMessage(self, message, addr):
+		print('received message: %s' %message)				
+		if (message.subject == "ping"):
+			print(message.getMessage())
+		elif (message.subject == "new_election"):
+			if (self.pid > message.sourceId):
+				self.__electionResponse(addr)
+		elif (message.subject == "election_response"):
+			print(message.getMessage())
+
 	def __sendBroadcastMessage(self, message):
 		data = pickle.dumps(message)
 		self.broadcastSocket.sendto(data, ('<broadcast>', self.DEFAULT_PORT))
