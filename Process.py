@@ -13,6 +13,7 @@ class Process:
 	DEFAULT_PORT = 37022
 	ELECTION_PORT = 37023
 	SYNCHRONIZE_TIME_PORT = 37024
+	SYNCHRONIZATION_TIME = 4
 
 	def __init__(self):
 		self.isCoordinator = False
@@ -94,24 +95,28 @@ class Process:
 		if len(messages) == 0:
 			self.isCoordinator = True
 
-	def __synchronizeTimer(self):
-		print('Starting time synchronization...')
-		timerSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-		timerSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-		timerSocket.settimeout(0.5)
-		timerSocket.bind(("", self.SYNCHRONIZE_TIME_PORT))
-		
-		messages = [self.timer.getTime()]
-		message = SynchronizeTimeMessage(self.pid, 0)
-		self.__sendBroadcastMessage(message)
+		threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 
-		try:
-			while(True):
-				data, addr = timerSocket.recvfrom(1024)
-				messages.append(pickle.loads(data))
-		except timeout:
-			print('Received %s time message responses' %( len(messages) - 1 ))
-		
-		updatedTime = reduce(lambda x, y: x.getMessage() + y.getMessage(), messages) / len(messages)
-		message = UpdateTimeMessage(self.pid, 0, updatedTime)
-		self.__sendBroadcastMessage(message)
+	def __synchronizeTimer(self, interval=SYNCHRONIZATION_TIME):
+		if self.isCoordinator:
+			print('Starting time synchronization...')
+			timerSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+			timerSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+			timerSocket.settimeout(0.5)
+			timerSocket.bind(("", self.SYNCHRONIZE_TIME_PORT))
+			
+			messages = [self.timer.getTime()]
+			message = SynchronizeTimeMessage(self.pid, 0)
+			self.__sendBroadcastMessage(message)
+
+			try:
+				while(True):
+					data, addr = timerSocket.recvfrom(1024)
+					messages.append(pickle.loads(data))
+			except timeout:
+				print('Received %s time message responses' %( len(messages) - 1 ))
+			
+			updatedTime = reduce(lambda x, y: x.getMessage() + y.getMessage(), messages) / len(messages)
+			message = UpdateTimeMessage(self.pid, 0, updatedTime)
+			self.__sendBroadcastMessage(message)
+			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
