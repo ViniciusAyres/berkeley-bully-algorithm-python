@@ -1,10 +1,10 @@
 from Message import Message
 
-class NewElectionMessage(Message):
+class ElectionMessage(Message):
 	def __init__(self, sourceId, destinationId):
 		self.sourceId = sourceId
 		self.destinationId = destinationId
-		self.subject = 'new_election'
+		self.subject = 'election'
 
 	def getMessage(self):
-		return ' New election from ' + str(self.sourceId) 
+		return 'Election from ' + str(self.sourceId) 

@@ -4,7 +4,7 @@ from socket import *
 from random import randint
 from Timer import Timer
 from PingMessage import PingMessage
-from NewElectionMessage import NewElectionMessage
+from ElectionMessage import ElectionMessage
 from ElectionResponseMessage import ElectionResponseMessage
 from SynchronizeTimeMessage import SynchronizeTimeMessage
 from UpdateTimeMessage import UpdateTimeMessage
@@ -65,7 +65,7 @@ class Process:
 		threading.Timer(interval, self.__randomPing, args=[interval]).start()
 
 	def __newElection(self):
-		message = NewElectionMessage(self.pid, 0)
+		message = ElectionMessage(self.pid, 0)
 		self.__sendBroadcastMessage(message)
 
 	def __electionResponse(self, adress):
