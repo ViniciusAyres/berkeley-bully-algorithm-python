@@ -28,7 +28,7 @@ class Process:
 		raw_input('Press Enter to continue...')
 		listener.start()
 		election.start()
-		self.__randomPing(randint(1, 5))
+		self.__randomPing(randint(10, 20))
 
 	def __str__(self):
 		return 'pid: ' + str(self.pid)
@@ -46,7 +46,7 @@ class Process:
 				self.__handleMessage(message, addr)
 			
 	def __handleMessage(self, message, addr):
-		print('received message: %s' %message.subject)				
+		print('Received message: %s' %message.subject)				
 		if (message.subject == "ping"):
 			print(message.getMessage())
 		elif (message.subject == "election"):
@@ -57,7 +57,7 @@ class Process:
 		elif (message.subject == "synchronization"):
 			self.__SyncTimeRequest(addr)
 		elif (message.subject == "time update"):
-			print("Timer atualizado para : " + message.getTime())
+			print("Timer updated to " + str(message.getMessage()))
 			self.timer.setTime(message.getMessage())
 
 	def __sendBroadcastMessage(self, message):
@@ -105,7 +105,7 @@ class Process:
 			print('I\'m the new coordinator')
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 		else:
-			print('I lost the election.')
+			print('I lost the election')
 
 
 	def __synchronizeTimer(self, interval=SYNCHRONIZATION_TIME):
@@ -133,6 +133,5 @@ class Process:
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 
 	def __SyncTimeRequest(self, addr):
-		print("Request Time...")		
 		message = SynchronizeTimeResponseMessage(self.pid, 0, self.timer.getTime())
 		self.__sendMessage(message, addr[0], self.SYNCHRONIZE_TIME_PORT)
