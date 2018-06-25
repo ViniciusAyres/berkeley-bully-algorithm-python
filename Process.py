@@ -21,9 +21,12 @@ class Process:
 		self.timer = Timer()
 		self.__initSockets()
 		
+		print('My id is: %s' %str(self.pid))
 		listener = threading.Thread(target=self.__listenMessages)
+		election = threading.Thread(target=self.__startElection)
 		raw_input('Press Enter to continue...')
 		listener.start()
+		election.start()
 		self.__randomPing(randint(1, 5))
 
 	def __str__(self):
@@ -104,8 +107,11 @@ class Process:
 
 		if len(messages) == 0:
 			self.isCoordinator = True
+			print('I\'m the new coordinator')
+			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
+		else:
+			print('I lost the election.')
 
-		threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 
 	def __synchronizeTimer(self, interval=SYNCHRONIZATION_TIME):
 		if self.isCoordinator:
