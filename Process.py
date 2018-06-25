@@ -147,5 +147,7 @@ class Process:
 
 	def __SyncTimeRequest(self, addr):
 		print("Request Time...")		
-		message = SynchronizeTimeResponseMessage(self.pid, 0, self.timer.getTime())
+		time = self.timer.time
+		print(time)
+		message = SynchronizeTimeResponseMessage(self.pid, 0, time)
 		self.__sendMessage(message, addr, self.SYNCHRONIZE_TIME_PORT)
