@@ -8,7 +8,7 @@ from ElectionMessage import ElectionMessage
 from ElectionResponseMessage import ElectionResponseMessage
 from SynchronizeTimeMessage import SynchronizeTimeMessage
 from UpdateTimeMessage import UpdateTimeMessage
-
+from SynchronizeTimeResponseMessage import SynchronizeTimeResponseMessage
 class Process:
 	DEFAULT_PORT = 37022
 	ELECTION_PORT = 37023
@@ -52,6 +52,11 @@ class Process:
 				listener.start()
 		elif (message.subject == "election_response"):
 			print(message.getMessage())
+		elif (message.subject == "synchronization"):
+			self.__SyncTimeRequest(addr)
+		elif (message.subject == "time update"):
+			print("Timer atualizado para : " + message.getTime())
+			self.timer = message.getTime()
 
 	def __sendBroadcastMessage(self, message):
 		data = pickle.dumps(message)
@@ -133,3 +138,8 @@ class Process:
 				biggerMsg = messages[i]
 			
 		return biggerMsg
+
+	def __SyncTimeRequest(self, addr):
+		print("Request Time...")		
+		message = SynchronizeTimeResponseMessage(self.pid, 0, self.timer.getTime())
+		self.__sendMessage(message, addr, self.SYNCHRONIZE_TIME_PORT)
