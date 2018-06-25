@@ -52,10 +52,8 @@ class Process:
 		elif (message.subject == "election"):
 			if (self.pid > message.sourceId):
 				self.__electionResponse(addr)					
-				listener = threading.Thread(target=self.__startElection)
-				listener.start()
-		elif (message.subject == "election response"):
-			print(message.getMessage())
+				election = threading.Thread(target=self.__startElection)
+				election.start()
 		elif (message.subject == "synchronization"):
 			self.__SyncTimeRequest(addr)
 		elif (message.subject == "time update"):
