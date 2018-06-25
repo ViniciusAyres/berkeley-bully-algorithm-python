@@ -9,6 +9,7 @@ from ElectionResponseMessage import ElectionResponseMessage
 from SynchronizeTimeMessage import SynchronizeTimeMessage
 from UpdateTimeMessage import UpdateTimeMessage
 from SynchronizeTimeResponseMessage import SynchronizeTimeResponseMessage
+
 class Process:
 	DEFAULT_PORT = 37022
 	ELECTION_PORT = 37023
@@ -79,10 +80,6 @@ class Process:
 		self.__sendBroadcastMessage(message)
 		threading.Timer(interval, self.__randomPing, args=[interval]).start()
 
-	def __newElection(self):
-		message = ElectionMessage(self.pid, 0)
-		self.__sendBroadcastMessage(message)
-
 	def __electionResponse(self, adress):
 		message = ElectionResponseMessage(self.pid, 0)
 		self.__sendMessage(message, adress, self.ELECTION_PORT)
@@ -136,14 +133,6 @@ class Process:
 			message = UpdateTimeMessage(self.pid, 0, updatedTime)
 			self.__sendBroadcastMessage(message)
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
-
-	def __choiceCoordinator(self, messages):
-		biggerMsg = messages[0]
-		for i in range(len(messages)):
-			if messages[i].sourceId > biggerMsg.sourceId:
-				biggerMsg = messages[i]
-			
-		return biggerMsg
 
 	def __SyncTimeRequest(self, addr):
 		print("Request Time...")		
