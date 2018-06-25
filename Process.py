@@ -9,11 +9,13 @@ from ElectionResponseMessage import ElectionResponseMessage
 from SynchronizeTimeMessage import SynchronizeTimeMessage
 from UpdateTimeMessage import UpdateTimeMessage
 from SynchronizeTimeResponseMessage import SynchronizeTimeResponseMessage
+from CoordinatorPingMessage import CoordinatorPingMessage
 
 class Process:
 	DEFAULT_PORT = 37022
 	ELECTION_PORT = 37023
 	SYNCHRONIZE_TIME_PORT = 37024
+	PING_COORDINATOR_PORT = 37025
 	SYNCHRONIZATION_TIME = 4
 
 	def __init__(self):
@@ -129,9 +131,31 @@ class Process:
 			
 			updatedTime = reduce(lambda x, y: x + y, time_list) / len(time_list)
 			message = UpdateTimeMessage(self.pid, 0, updatedTime)
+			self.timer.setTime(updatedTime)
 			self.__sendBroadcastMessage(message)
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 
 	def __SyncTimeRequest(self, addr):
 		message = SynchronizeTimeResponseMessage(self.pid, 0, self.timer.getTime())
 		self.__sendMessage(message, addr[0], self.SYNCHRONIZE_TIME_PORT)
+
+	def __initBroadcastSocket(self, port):
+		broadcastSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+		broadcastSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+		broadcastSocket.bind(("", port))
+		return broadcastSocket
+
+	def __pingCoordinator(self):
+		print('Pinging coordinator...')
+		broadcastSocket = self.__initBroadcastSocket(self.PING_COORDINATOR_PORT)
+		broadcastSocket.settimeout(1)
+		message = CoordinatorPingMessage(self.pid, 0)
+		self.__sendBroadcastMessage(message)
+
+		try:
+			data, addr = broadcastSocket.recvfrom(1024)
+			print('Coordinator is alive')
+		except timeout:
+			print('Coordinator is dead')
+			election = threading.Thread(target=self.__startElection)
+			election.start()
