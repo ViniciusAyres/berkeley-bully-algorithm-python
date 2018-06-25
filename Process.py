@@ -58,7 +58,7 @@ class Process:
 			self.__SyncTimeRequest(addr)
 		elif (message.subject == "time update"):
 			print("Timer atualizado para : " + message.getTime())
-			self.timer = message.getTime()
+			self.timer.setTime(message.getMessage())
 
 	def __sendBroadcastMessage(self, message):
 		data = pickle.dumps(message)
