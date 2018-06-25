@@ -99,8 +99,11 @@ class Process:
 		print('Starting election...')
 		electionSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
 		electionSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-		electionSocket.settimeout(5)
-		electionSocket.bind(("", self.ELECTION_PORT))
+		electionSocket.settimeout(0.5)
+		try:
+			electionSocket.bind(("", self.ELECTION_PORT))
+		except:
+			electionSocket.close()
 		
 		messages = []
 		message = ElectionMessage(self.pid, 0)
