@@ -53,7 +53,7 @@ class Process:
 				self.__electionResponse(addr)					
 				listener = threading.Thread(target=self.__startElection)
 				listener.start()
-		elif (message.subject == "election_response"):
+		elif (message.subject == "election response"):
 			print(message.getMessage())
 		elif (message.subject == "synchronization"):
 			self.__SyncTimeRequest(addr)
