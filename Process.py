@@ -23,7 +23,7 @@ class Process:
 	def __init__(self):
 		self.isCoordinator = False
 		self.pid = randint(0,1000)
-		self.timer = Timer(interval=randint(1, 5))
+		self.timer = Timer(increment=randint(1, 5))
 		self.__initSockets()
 		
 		print('My id is: %s' %str(self.pid))
