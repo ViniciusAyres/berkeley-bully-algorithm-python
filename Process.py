@@ -23,7 +23,7 @@ class Process:
 	def __init__(self):
 		self.isCoordinator = False
 		self.pid = randint(0,1000)
-		self.timer = Timer()
+		self.timer = Timer(interval=randint(1, 5))
 		self.__initSockets()
 		
 		print('My id is: %s' %str(self.pid))
@@ -47,6 +47,7 @@ class Process:
 
 		while(True):
 			print('coordinator: ' + str(self.isCoordinator))
+			print('Timer: ' + str(self.timer.getTime()))
 			data, addr = client.recvfrom(1024)
 			message = pickle.loads(data)
 			if(message.sourceId != self.pid):
@@ -150,6 +151,7 @@ class Process:
 			
 			updatedTime = reduce(lambda x, y: x + y, time_list) / len(time_list)
 			message = UpdateTimeMessage(self.pid, 0, updatedTime)
+			print("Timer updated to " + str(updatedTime))
 			self.timer.setTime(updatedTime)
 			self.__sendBroadcastMessage(message)
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
