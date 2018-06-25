@@ -116,18 +116,18 @@ class Process:
 			timerSocket.settimeout(0.5)
 			timerSocket.bind(("", self.SYNCHRONIZE_TIME_PORT))
 			
-			messages = [self.timer.getTime()]
+			time_list = [self.timer.getTime()]
 			message = SynchronizeTimeMessage(self.pid, 0)
 			self.__sendBroadcastMessage(message)
 
 			try:
 				while(True):
 					data, addr = timerSocket.recvfrom(1024)
-					messages.append(pickle.loads(data))
+					time_list.append(pickle.loads(data).getMessage())
 			except timeout:
-				print('Received %s time message responses' %( len(messages) - 1 ))
+				print('Received %s time message responses' %( len(time_list) - 1 ))
 			
-			updatedTime = reduce(lambda x, y: x.getMessage() + y.getMessage(), messages) / len(messages)
+			updatedTime = reduce(lambda x, y: x + y, time_list) / len(time_list)
 			message = UpdateTimeMessage(self.pid, 0, updatedTime)
 			self.__sendBroadcastMessage(message)
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
