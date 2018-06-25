@@ -107,6 +107,7 @@ class Process:
 			print('I\'m the new coordinator')
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 		else:
+			self.isCoordinator = False
 			print('I lost the election')
 
 
