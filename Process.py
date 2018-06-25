@@ -48,7 +48,7 @@ class Process:
 		print('received message: %s' %message.subject)				
 		if (message.subject == "ping"):
 			print(message.getMessage())
-		elif (message.subject == "new_election"):
+		elif (message.subject == "election"):
 			if (self.pid > message.sourceId):
 				self.__electionResponse(addr)					
 				listener = threading.Thread(target=self.__startElection)
