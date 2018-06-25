@@ -123,6 +123,7 @@ class Process:
 			self.isCoordinator = False
 			print('I lost the election')
 
+		electionSocket.close()
 
 	def __synchronizeTimer(self, interval=SYNCHRONIZATION_TIME):
 		if self.isCoordinator:
@@ -148,6 +149,7 @@ class Process:
 			self.timer.setTime(updatedTime)
 			self.__sendBroadcastMessage(message)
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
+			timerSocket.close()
 
 	def __SyncTimeRequest(self, addr):
 		message = SynchronizeTimeResponseMessage(self.pid, 0, self.timer.getTime())
@@ -162,18 +164,22 @@ class Process:
 	def __pingCoordinator(self):
 		if (not self.isCoordinator):
 			print('Pinging coordinator...')
-			broadcastSocket = self.__initBroadcastSocket(self.PING_COORDINATOR_PORT)
-			broadcastSocket.settimeout(1)
+			pingSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+			pingSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+			pingSocket.bind(("", self.PING_COORDINATOR_PORT))
+			pingSocket.settimeout(1)
 			message = CoordinatorPingMessage(self.pid, 0)
 			self.__sendBroadcastMessage(message)
 
 			try:
-				data, addr = broadcastSocket.recvfrom(1024)
+				data, addr = pingSocket.recvfrom(1024)
 				print('Coordinator is alive')
 			except timeout:
 				print('Coordinator is dead')
 				election = threading.Thread(target=self.__startElection)
 				election.start()
+
+			pingSocket.close()
 
 		threading.Timer(self.COORDINATOR_PING_TIME, self.__pingCoordinator).start()
 
