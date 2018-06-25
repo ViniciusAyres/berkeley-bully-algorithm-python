@@ -18,7 +18,7 @@ class Process:
 	SYNCHRONIZE_TIME_PORT = 37024
 	PING_COORDINATOR_PORT = 37025
 	SYNCHRONIZATION_TIME = 4
-	COORDINATOR_PING_TIME = 3
+	COORDINATOR_PING_TIME = 15
 
 	def __init__(self):
 		self.isCoordinator = False
@@ -46,6 +46,7 @@ class Process:
 		client.bind(("", self.DEFAULT_PORT))
 
 		while(True):
+			print('coordinator: ' + str(self.isCoordinator))
 			data, addr = client.recvfrom(1024)
 			message = pickle.loads(data)
 			if(message.sourceId != self.pid):
@@ -89,15 +90,15 @@ class Process:
 		self.__sendBroadcastMessage(message)
 		threading.Timer(interval, self.__randomPing, args=[interval]).start()
 
-	def __electionResponse(self, adress):
+	def __electionResponse(self, address):
 		message = ElectionResponseMessage(self.pid, 0)
-		self.__sendMessage(message, adress, self.ELECTION_PORT)
+		self.__sendMessage(message, address[0], self.ELECTION_PORT)
 		
 	def __startElection(self):
 		print('Starting election...')
 		electionSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
 		electionSocket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-		electionSocket.settimeout(0.5)
+		electionSocket.settimeout(5)
 		electionSocket.bind(("", self.ELECTION_PORT))
 		
 		messages = []
@@ -111,6 +112,8 @@ class Process:
 		except timeout:
 			print('Received %s election messages responses' %(len(messages)))
 
+		print('messages:')
+		print(messages)
 		if len(messages) == 0:
 			self.isCoordinator = True
 			print('I\'m the new coordinator')
