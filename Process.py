@@ -57,6 +57,7 @@ class Process:
 		if (message.subject == "ping"):
 			print(message.getMessage())
 		elif (message.subject == "election"):
+			self.isCoordinator = False
 			if (self.pid > message.sourceId):
 				self.__electionResponse(addr)					
 				election = threading.Thread(target=self.__startElection)
