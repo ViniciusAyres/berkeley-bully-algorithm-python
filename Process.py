@@ -166,8 +166,10 @@ class Process:
 			try:
 				data, addr = broadcastSocket.recvfrom(1024)
 				print('Coordinator is alive')
-				threading.Timer(self.COORDINATOR_PING_TIME, self.__pingCoordinator).start()
 			except timeout:
 				print('Coordinator is dead')
 				election = threading.Thread(target=self.__startElection)
 				election.start()
+
+		threading.Timer(self.COORDINATOR_PING_TIME, self.__pingCoordinator).start()
+
