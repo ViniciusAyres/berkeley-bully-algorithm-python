@@ -104,6 +104,7 @@ class Process:
 			electionSocket.bind(("", self.ELECTION_PORT))
 		except:
 			electionSocket.close()
+			return
 		
 		messages = []
 		message = ElectionMessage(self.pid, 0)
