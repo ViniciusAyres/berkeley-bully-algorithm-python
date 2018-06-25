@@ -127,12 +127,12 @@ class Process:
 			except timeout:
 				print('Received %s time message responses' %( len(messages) - 1 ))
 			
-			updatedTime = reduce(lambda x, y: x + y, messages) / len(messages)
+			updatedTime = reduce(lambda x, y: x.getMessage() + y.getMessage(), messages) / len(messages)
 			message = UpdateTimeMessage(self.pid, 0, updatedTime)
 			self.__sendBroadcastMessage(message)
 			threading.Timer(self.SYNCHRONIZATION_TIME, self.__synchronizeTimer).start()
 
 	def __SyncTimeRequest(self, addr):
 		print("Request Time...")		
-		message = SynchronizeTimeResponseMessage(self.pid, 0, self.timer)
+		message = SynchronizeTimeResponseMessage(self.pid, 0, self.timer.getTime())
 		self.__sendMessage(message, addr[0], self.SYNCHRONIZE_TIME_PORT)
